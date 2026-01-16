@@ -844,6 +844,17 @@ export default function HabitFlow() {
     return () => clearTimeout(timeoutId);
   }, [tasks]);
 
+  // Sauvegarde automatique toutes les 5 minutes
+  React.useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      console.log('💾 Auto-save triggered (5 min interval)');
+      saveToStorage(STORAGE_KEYS.habits, habits);
+      saveToStorage(STORAGE_KEYS.tasks, tasks);
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearInterval(autoSaveInterval);
+  }, [habits, tasks]);
+
   // Fonction d'export pour backup manuel
   const exportData = () => {
     const exportData = {
