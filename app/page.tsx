@@ -13,6 +13,26 @@ export default function HabitFlow() {
     { id: 1, title: 'Réviser le projet', category: 'work', priority: 'high', completed: false },
     { id: 2, title: 'Appeler le médecin', category: 'personal', priority: 'medium', completed: false }
   ]);
+  
+  // Timer states
+  const [activeTimer, setActiveTimer] = useState<any>(null);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [clockInterval, setClockInterval] = useState<NodeJS.Timeout | null>(null);
+  const [notifiedItems, setNotifiedItems] = useState<Set<string>>(new Set());
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [analyticsView, setAnalyticsView] = useState('month');
+  
+  // Modal states
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editType, setEditType] = useState<'habit' | 'task'>('habit');
 
   const toggleHabit = (habitId: number) => {
     setHabits(habits.map(habit => {
@@ -2985,6 +3005,4 @@ export default function HabitFlow() {
       <TimerWidget />
     </div>
   );
-};
-
-export default HabitFlow;
+}
