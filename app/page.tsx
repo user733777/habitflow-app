@@ -671,11 +671,12 @@ export default function HabitFlow() {
     const savedHabits = loadFromStorage(STORAGE_KEYS.habits);
     const savedTasks = loadFromStorage(STORAGE_KEYS.tasks);
     
-    if (savedHabits && Array.isArray(savedHabits)) {
+    // Charger uniquement si des données existent ET ne sont pas vides
+    if (savedHabits && Array.isArray(savedHabits) && savedHabits.length > 0) {
       setHabits(savedHabits);
     }
     
-    if (savedTasks && Array.isArray(savedTasks)) {
+    if (savedTasks && Array.isArray(savedTasks) && savedTasks.length > 0) {
       setTasks(savedTasks);
     }
     
