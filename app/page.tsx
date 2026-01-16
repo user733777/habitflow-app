@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Plus, Calendar, Target, CheckCircle, Circle, Flame, Trophy, BarChart3, Settings, Home, Search } from 'lucide-react';
+import { Plus, Calendar, Target, CheckCircle, Circle, Flame, Trophy, BarChart3, Settings, Home, Search, MoreHorizontal, Clock } from 'lucide-react';
 
 export default function HabitFlow() {
   const [activeTab, setActiveTab] = useState('dashboard');
