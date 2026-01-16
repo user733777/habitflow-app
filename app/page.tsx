@@ -6,12 +6,20 @@ import { Plus, Calendar, Target, CheckCircle, Circle, Flame, Trophy, BarChart3, 
 export default function HabitFlow() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [habits, setHabits] = useState([
-    { id: 1, name: 'Boire 2L d\'eau', category: 'health', streak: 5, completed: false, color: 'bg-blue-500' },
-    { id: 2, name: 'Faire 30 min d\'exercice', category: 'fitness', streak: 3, completed: false, color: 'bg-green-500' }
+    { id: 1, name: 'Boire 2L d\'eau', category: 'health', streak: 12, completed: false, color: 'bg-blue-500' },
+    { id: 2, name: 'Faire 30 min d\'exercice', category: 'fitness', streak: 8, completed: true, color: 'bg-green-500' },
+    { id: 3, name: 'Méditer 10 minutes', category: 'wellness', streak: 15, completed: false, color: 'bg-purple-500' },
+    { id: 4, name: 'Lire 20 pages', category: 'learning', streak: 6, completed: false, color: 'bg-orange-500' },
+    { id: 5, name: 'Écrire dans mon journal', category: 'wellness', streak: 4, completed: false, color: 'bg-pink-500' },
+    { id: 6, name: 'Prendre mes vitamines', category: 'health', streak: 20, completed: true, color: 'bg-indigo-500' }
   ]);
   const [tasks, setTasks] = useState([
     { id: 1, title: 'Réviser le projet', category: 'work', priority: 'high', completed: false },
-    { id: 2, title: 'Appeler le médecin', category: 'personal', priority: 'medium', completed: false }
+    { id: 2, title: 'Appeler le médecin', category: 'personal', priority: 'medium', completed: false },
+    { id: 3, title: 'Préparer la présentation', category: 'work', priority: 'high', completed: false },
+    { id: 4, title: 'Faire les courses', category: 'personal', priority: 'low', completed: true },
+    { id: 5, title: 'Répondre aux emails', category: 'work', priority: 'medium', completed: false },
+    { id: 6, title: 'Réserver le restaurant', category: 'personal', priority: 'low', completed: false }
   ]);
   
   // Timer states
@@ -29,7 +37,7 @@ export default function HabitFlow() {
   const [analyticsView, setAnalyticsView] = useState('month');
   
   // View states
-  const [resumeView, setResumeView] = useState('week');
+  const [resumeView, setResumeView] = useState<'week' | 'month'>('week');
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
   const [currentMonthOffset, setCurrentMonthOffset] = useState(0);
   
@@ -514,7 +522,7 @@ export default function HabitFlow() {
     // Vérifier les habitudes
     habits.forEach(habit => {
       if (shouldNotifyHabit(habit)) {
-        console.log(`🎯 Time for habit: ${habit.name} at ${habit.timeSlot}`);
+        console.log(`🎯 Time for habit: ${habit.name} at ${(habit as any).timeSlot}`);
         triggerScheduledNotification(habit, 'habit');
       }
     });
@@ -522,7 +530,7 @@ export default function HabitFlow() {
     // Vérifier les tâches
     tasks.forEach(task => {
       if (shouldNotifyTask(task)) {
-        console.log(`📋 Time for task: ${task.title} at ${task.timeSlot}`);
+        console.log(`📋 Time for task: ${task.title} at ${(task as any).timeSlot}`);
         triggerScheduledNotification(task, 'task');
       }
     });
@@ -590,9 +598,15 @@ export default function HabitFlow() {
       console.error(`❌ Error saving ${key}:`, error);
       
       // Essayer de nettoyer le localStorage si plein
-      if (error.name === 'QuotaExceededError') {
+      if (error instanceof Error && error.name === 'QuotaExceededError') {
         console.log('🧹 Storage full, cleaning old data...');
         try {
+          const dataWithMeta = {
+            version: STORAGE_VERSION,
+            timestamp: Date.now(),
+            data: data
+          };
+          
           // Nettoyer les anciennes versions
           Object.keys(localStorage).forEach(storageKey => {
             if (storageKey.includes('habitflow') && !storageKey.includes('_v1')) {
@@ -982,7 +996,7 @@ export default function HabitFlow() {
 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.description.toLowerCase().includes(searchTerm.toLowerCase());
+                         ((task as any).description || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'all' || task.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
@@ -1044,10 +1058,10 @@ export default function HabitFlow() {
 
   const getItemsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    const habitItems = habits.filter(h => h.timeSlot).map(h => ({ ...h, type: 'habit' }));
-    const taskItems = tasks.filter(t => t.timeSlot && t.dueDate === dateStr).map(t => ({ ...t, type: 'task' }));
+    const habitItems = habits.filter((h: any) => h.timeSlot).map((h: any) => ({ ...h, type: 'habit' }));
+    const taskItems = tasks.filter((t: any) => t.timeSlot && t.dueDate === dateStr).map((t: any) => ({ ...t, type: 'task' }));
     
-    return [...habitItems, ...taskItems].sort((a, b) => a.timeSlot.localeCompare(b.timeSlot));
+    return [...habitItems, ...taskItems].sort((a: any, b: any) => a.timeSlot.localeCompare(b.timeSlot));
   };
 
   const getTaskIcon = (iconName: string) => {
@@ -1087,28 +1101,6 @@ export default function HabitFlow() {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Résumé - Semaine du {weekStart} au {weekEnd}</h2>
                 <p className="text-gray-600 mt-1">Vue hebdomadaire des habitudes et tâches</p>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setResumeView('week')}
-                  className={`px-4 py-2 rounded-xl transition-colors flex items-center ${
-                    resumeView === 'week' 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Hebdo
-                </button>
-                <button
-                  onClick={() => setResumeView('month')}
-                  className={`px-4 py-2 rounded-xl transition-colors flex items-center ${
-                    resumeView === 'month' 
-                      ? 'bg-orange-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Mois
-                </button>
               </div>
             </div>
           </div>
