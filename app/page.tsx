@@ -31,6 +31,7 @@ export default function HabitFlow() {
   // View states
   const [resumeView, setResumeView] = useState('week');
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  const [currentMonthOffset, setCurrentMonthOffset] = useState(0);
   
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
