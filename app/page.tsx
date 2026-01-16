@@ -6,20 +6,152 @@ import { Plus, Calendar, Target, CheckCircle, Circle, Flame, Trophy, BarChart3, 
 export default function HabitFlow() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [habits, setHabits] = useState([
-    { id: 1, name: 'Boire 2L d\'eau', category: 'health', streak: 12, completed: false, color: 'bg-blue-500' },
-    { id: 2, name: 'Faire 30 min d\'exercice', category: 'fitness', streak: 8, completed: true, color: 'bg-green-500' },
-    { id: 3, name: 'Méditer 10 minutes', category: 'wellness', streak: 15, completed: false, color: 'bg-purple-500' },
-    { id: 4, name: 'Lire 20 pages', category: 'learning', streak: 6, completed: false, color: 'bg-orange-500' },
-    { id: 5, name: 'Écrire dans mon journal', category: 'wellness', streak: 4, completed: false, color: 'bg-pink-500' },
-    { id: 6, name: 'Prendre mes vitamines', category: 'health', streak: 20, completed: true, color: 'bg-indigo-500' }
+    { 
+      id: 1, 
+      name: 'Boire 2L d\'eau', 
+      description: 'Hydratation quotidienne', 
+      category: 'health', 
+      streak: 12, 
+      completed: false, 
+      color: 'bg-blue-500',
+      timeSlot: '08:00',
+      duration: 30,
+      selectedDays: [1, 2, 3, 4, 5, 6, 0],
+      timerEnabled: false
+    },
+    { 
+      id: 2, 
+      name: 'Faire 30 min d\'exercice', 
+      description: 'Sport quotidien', 
+      category: 'fitness', 
+      streak: 8, 
+      completed: true, 
+      color: 'bg-green-500',
+      timeSlot: '07:00',
+      duration: 30,
+      selectedDays: [1, 2, 3, 4, 5],
+      timerEnabled: true
+    },
+    { 
+      id: 3, 
+      name: 'Méditer 10 minutes', 
+      description: 'Pleine conscience', 
+      category: 'wellness', 
+      streak: 15, 
+      completed: false, 
+      color: 'bg-purple-500',
+      timeSlot: '09:00',
+      duration: 10,
+      selectedDays: [1, 2, 3, 4, 5, 6, 0],
+      timerEnabled: true
+    },
+    { 
+      id: 4, 
+      name: 'Lire 20 pages', 
+      description: 'Lecture quotidienne', 
+      category: 'learning', 
+      streak: 6, 
+      completed: false, 
+      color: 'bg-orange-500',
+      timeSlot: '20:00',
+      duration: 30,
+      selectedDays: [1, 2, 3, 4, 5, 6, 0],
+      timerEnabled: false
+    },
+    { 
+      id: 5, 
+      name: 'Écrire dans mon journal', 
+      description: 'Réflexion quotidienne', 
+      category: 'wellness', 
+      streak: 4, 
+      completed: false, 
+      color: 'bg-pink-500',
+      timeSlot: '21:00',
+      duration: 15,
+      selectedDays: [1, 2, 3, 4, 5, 6, 0],
+      timerEnabled: false
+    },
+    { 
+      id: 6, 
+      name: 'Prendre mes vitamines', 
+      description: 'Suppléments quotidiens', 
+      category: 'health', 
+      streak: 20, 
+      completed: true, 
+      color: 'bg-yellow-500',
+      timeSlot: '08:30',
+      duration: 5,
+      selectedDays: [1, 2, 3, 4, 5, 6, 0],
+      timerEnabled: false
+    }
   ]);
   const [tasks, setTasks] = useState([
-    { id: 1, title: 'Réviser le projet', category: 'work', priority: 'high', completed: false },
-    { id: 2, title: 'Appeler le médecin', category: 'personal', priority: 'medium', completed: false },
-    { id: 3, title: 'Préparer la présentation', category: 'work', priority: 'high', completed: false },
-    { id: 4, title: 'Faire les courses', category: 'personal', priority: 'low', completed: true },
-    { id: 5, title: 'Répondre aux emails', category: 'work', priority: 'medium', completed: false },
-    { id: 6, title: 'Réserver le restaurant', category: 'personal', priority: 'low', completed: false }
+    { 
+      id: 1, 
+      title: 'Réviser le projet', 
+      category: 'work', 
+      priority: 'high', 
+      completed: false,
+      timeSlot: '10:00',
+      duration: 60,
+      dueDate: new Date().toISOString().split('T')[0],
+      timerEnabled: true
+    },
+    { 
+      id: 2, 
+      title: 'Appeler le médecin', 
+      category: 'personal', 
+      priority: 'medium', 
+      completed: false,
+      timeSlot: '14:00',
+      duration: 15,
+      dueDate: new Date().toISOString().split('T')[0],
+      timerEnabled: false
+    },
+    { 
+      id: 3, 
+      title: 'Préparer la présentation', 
+      category: 'work', 
+      priority: 'high', 
+      completed: false,
+      timeSlot: '15:00',
+      duration: 90,
+      dueDate: new Date().toISOString().split('T')[0],
+      timerEnabled: true
+    },
+    { 
+      id: 4, 
+      title: 'Faire les courses', 
+      category: 'personal', 
+      priority: 'low', 
+      completed: true,
+      timeSlot: '18:00',
+      duration: 45,
+      dueDate: new Date().toISOString().split('T')[0],
+      timerEnabled: false
+    },
+    { 
+      id: 5, 
+      title: 'Répondre aux emails', 
+      category: 'work', 
+      priority: 'medium', 
+      completed: false,
+      timeSlot: '11:00',
+      duration: 30,
+      dueDate: new Date().toISOString().split('T')[0],
+      timerEnabled: false
+    },
+    { 
+      id: 6, 
+      title: 'Réserver le restaurant', 
+      category: 'personal', 
+      priority: 'low', 
+      completed: false,
+      timeSlot: '16:00',
+      duration: 10,
+      dueDate: new Date().toISOString().split('T')[0],
+      timerEnabled: false
+    }
   ]);
   
   // Timer states
@@ -1059,7 +1191,15 @@ export default function HabitFlow() {
 
   const getItemsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    const habitItems = habits.filter((h: any) => h.timeSlot).map((h: any) => ({ ...h, type: 'habit' }));
+    const dayOfWeek = date.getDay(); // 0 = Dimanche, 1 = Lundi, etc.
+    
+    // Filtrer les habitudes qui ont un timeSlot et qui sont programmées pour ce jour
+    const habitItems = habits.filter((h: any) => {
+      if (!h.timeSlot) return false;
+      if (!h.selectedDays || !Array.isArray(h.selectedDays)) return true; // Si pas de selectedDays, afficher tous les jours
+      return h.selectedDays.includes(dayOfWeek);
+    }).map((h: any) => ({ ...h, type: 'habit' }));
+    
     const taskItems = tasks.filter((t: any) => t.timeSlot && t.dueDate === dateStr).map((t: any) => ({ ...t, type: 'task' }));
     
     return [...habitItems, ...taskItems].sort((a: any, b: any) => a.timeSlot.localeCompare(b.timeSlot));
