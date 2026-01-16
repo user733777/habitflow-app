@@ -178,6 +178,7 @@ export default function HabitFlow() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [editType, setEditType] = useState<'habit' | 'task'>('habit');
+  const [modalType, setModalType] = useState<'habit' | 'task'>('habit');
 
   const toggleHabit = (habitId: number) => {
     setHabits(habits.map(habit => {
