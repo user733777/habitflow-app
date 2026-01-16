@@ -28,6 +28,10 @@ export default function HabitFlow() {
   const [filterCategory, setFilterCategory] = useState('all');
   const [analyticsView, setAnalyticsView] = useState('month');
   
+  // View states
+  const [resumeView, setResumeView] = useState('week');
+  const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
