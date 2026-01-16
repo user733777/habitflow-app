@@ -2304,8 +2304,8 @@ export default function HabitFlow() {
                 value={formData.duration}
                 onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) || 30 })}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                min="15"
-                step="15"
+                min="5"
+                step="5"
               />
             </div>
             
