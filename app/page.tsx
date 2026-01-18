@@ -1,9 +1,30 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Calendar, Target, CheckCircle, Circle, Flame, Trophy, BarChart3, Settings, Home, Search, MoreHorizontal, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function HabitFlow() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Vérifier l'authentification au chargement
+  useEffect(() => {
+    const user = localStorage.getItem('habitflow_user');
+    if (user) {
+      const userData = JSON.parse(user);
+      if (userData.loggedIn) {
+        setIsAuthenticated(true);
+      } else {
+        router.push('/login');
+      }
+    } else {
+      router.push('/login');
+    }
+    setIsLoading(false);
+  }, [router]);
+  
   const [activeTab, setActiveTab] = useState('dashboard');
   const [habits, setHabits] = useState([
     { 
@@ -2441,6 +2462,28 @@ export default function HabitFlow() {
     setEditingItem(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('habitflow_user');
+    router.push('/login');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mb-4 mx-auto animate-pulse">
+            <Target className="w-10 h-10 text-white" />
+          </div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       <header className="bg-white shadow-sm border-b border-gray-100 w-full">
@@ -2460,6 +2503,12 @@ export default function HabitFlow() {
                 <p className="text-sm font-medium text-gray-900">Aujourd'hui</p>
                 <p className="text-xs text-gray-500">{getTodayFormatted()}</p>
               </div>
+              <button 
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors text-sm font-medium"
+              >
+                Déconnexion
+              </button>
               <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <Settings className="w-5 h-5" />
               </button>
