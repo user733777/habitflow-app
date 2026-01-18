@@ -1190,8 +1190,17 @@ export default function HabitFlow() {
     return { weeks, monthName: targetMonth.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) };
   };
 
-  const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-  const dayColors = {
+  const dayNames: { [key: number]: string } = {
+    0: 'Dim',
+    1: 'Lun',
+    2: 'Mar',
+    3: 'Mer',
+    4: 'Jeu',
+    5: 'Ven',
+    6: 'Sam'
+  };
+  
+  const dayColors: { [key: number]: string } = {
     0: 'bg-red-500',
     1: 'bg-yellow-500',
     2: 'bg-blue-500',
@@ -1242,21 +1251,50 @@ export default function HabitFlow() {
 
   // Composant Résumé
   const ResumeView = () => {
-    if (resumeView === 'week') {
-      const weekDates = getWeekDates(currentWeekOffset);
-      const weekStart = weekDates[0].toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
-      const weekEnd = weekDates[6].toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-
-      return (
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Résumé - Semaine du {weekStart} au {weekEnd}</h2>
-                <p className="text-gray-600 mt-1">Vue hebdomadaire des habitudes et tâches</p>
-              </div>
+    const weekDates = getWeekDates(currentWeekOffset);
+    const { weeks, monthName } = getMonthWeeks(currentMonthOffset);
+    
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">
+                Résumé - {resumeView === 'week' 
+                  ? `Semaine du ${weekDates[0].toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} au ${weekDates[6].toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`
+                  : monthName
+                }
+              </h2>
+              <p className="text-gray-600 mt-1">
+                {resumeView === 'week' ? 'Vue hebdomadaire des habitudes et tâches' : 'Vue mensuelle par semaines'}
+              </p>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setResumeView('week')}
+                className={`px-4 py-2 rounded-xl transition-colors flex items-center ${
+                  resumeView === 'week' 
+                    ? 'bg-green-600 text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Hebdo
+              </button>
+              <button
+                onClick={() => setResumeView('month')}
+                className={`px-4 py-2 rounded-xl transition-colors flex items-center ${
+                  resumeView === 'month' 
+                    ? 'bg-orange-600 text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Mois
+              </button>
             </div>
           </div>
+        </div>
+
+        {resumeView === 'week' ? (
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-6">
@@ -1313,44 +1351,7 @@ export default function HabitFlow() {
               </div>
             </div>
           </div>
-        </div>
-      );
-    } else {
-      const { weeks, monthName } = getMonthWeeks(currentMonthOffset);
-
-      return (
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Résumé - {monthName}</h2>
-                <p className="text-gray-600 mt-1">Vue mensuelle par semaines</p>
-              </div>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => setResumeView('week')}
-                  className={`px-4 py-2 rounded-xl transition-colors flex items-center ${
-                    resumeView === 'week' 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Hebdo
-                </button>
-                <button
-                  onClick={() => setResumeView('month')}
-                  className={`px-4 py-2 rounded-xl transition-colors flex items-center ${
-                    resumeView === 'month' 
-                      ? 'bg-orange-600 text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Mois
-                </button>
-              </div>
-            </div>
-          </div>
-
+        ) : (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -1407,9 +1408,9 @@ export default function HabitFlow() {
               </div>
             </div>
           </div>
-        </div>
-      );
-    }
+        )}
+      </div>
+    );
   };
 
   const DailyPlanningView = () => {
@@ -1425,7 +1426,7 @@ export default function HabitFlow() {
       ...tasks.filter(t => t.timeSlot && t.dueDate === getTodayKey()).map(t => ({ ...t, type: 'task' }))
     ].sort((a, b) => a.timeSlot.localeCompare(b.timeSlot));
 
-    const getTimeFromSlot = (timeSlot, duration = 30) => {
+    const getTimeFromSlot = (timeSlot: string, duration: number = 30) => {
       const [hour, minute] = timeSlot.split(':').map(Number);
       const startTime = timeSlot;
       const endHour = Math.floor((hour * 60 + minute + duration) / 60);
@@ -1434,7 +1435,7 @@ export default function HabitFlow() {
       return { startTime, endTime };
     };
 
-    const getItemColor = (item) => {
+    const getItemColor = (item: any) => {
       if (item.type === 'habit') {
         return item.color;
       }
@@ -1450,7 +1451,7 @@ export default function HabitFlow() {
       }
     };
 
-    const toggleItem = (item) => {
+    const toggleItem = (item: any) => {
       if (item.type === 'habit') {
         toggleHabit(item.id);
       } else {
@@ -1527,7 +1528,7 @@ export default function HabitFlow() {
                             <h4 className={`font-semibold text-gray-900 ${
                               item.completed ? 'line-through text-gray-500' : ''
                             }`}>
-                              {item.type === 'habit' ? item.name : item.title}
+                              {item.type === 'habit' ? (item as any).name : (item as any).title}
                             </h4>
                             
                             <button
@@ -1545,7 +1546,7 @@ export default function HabitFlow() {
                             </button>
                           </div>
                           
-                          <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                          <p className="text-sm text-gray-600 mt-1">{(item as any).description}</p>
                           
                           <div className="flex items-center mt-2 space-x-3">
                             <span className={`text-xs px-2 py-1 rounded-full ${ 
@@ -1561,19 +1562,19 @@ export default function HabitFlow() {
                             {item.type === 'habit' && (
                               <div className="flex items-center text-orange-500">
                                 <Flame className="w-3 h-3 mr-1" />
-                                <span className="text-xs font-semibold">{item.streak}</span>
+                                <span className="text-xs font-semibold">{(item as any).streak}</span>
                               </div>
                             )}
                             
                             {item.type === 'task' && (
-                              <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(item.priority)}`}>
-                                {item.priority}
+                              <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor((item as any).priority)}`}>
+                                {(item as any).priority}
                               </span>
                             )}
                             
                             <div className="flex items-center text-xs text-gray-500">
                               <Clock className="w-3 h-3 mr-1" />
-                              {item.type === 'task' ? `${item.duration}min` : `${item.duration || 30}min`}
+                              {item.type === 'task' ? `${(item as any).duration}min` : `${(item as any).duration || 30}min`}
                             </div>
                           </div>
                         </div>
@@ -1874,13 +1875,13 @@ export default function HabitFlow() {
                 {task.completed ? <CheckCircle className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
               </button>
               
-              <div className={`w-4 h-4 rounded-full ${task.color || 'bg-gray-500'} mr-4`}></div>
+              <div className={`w-4 h-4 rounded-full ${(task as any).color || 'bg-gray-500'} mr-4`}></div>
               
               <div className="flex-1">
                 <h3 className={`font-semibold ${task.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
                   {task.title}
                 </h3>
-                <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                <p className="text-sm text-gray-600 mt-1">{(task as any).description}</p>
                 <div className="flex items-center mt-2 space-x-4">
                   <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
                     {task.priority}
@@ -2109,7 +2110,7 @@ export default function HabitFlow() {
       }
     }, [showEditModal, editingItem, editType]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
       
       // Form validation
@@ -2131,7 +2132,7 @@ export default function HabitFlow() {
       
       // Generate unique ID with timestamp and random component to avoid collisions
       const generateUniqueId = () => {
-        return Date.now() + Math.random().toString(36).substr(2, 9);
+        return Date.now() + Math.floor(Math.random() * 1000);
       };
       
       if (showEditModal && editingItem) {
@@ -2245,7 +2246,7 @@ export default function HabitFlow() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                rows="2"
+                rows={2}
               />
             </div>
             
@@ -2420,13 +2421,13 @@ export default function HabitFlow() {
   };
 
   // Ajouter ces nouvelles fonctions après les fonctions existantes
-  const openEditModal = (item, type) => {
+  const openEditModal = (item: any, type: 'habit' | 'task') => {
     setEditingItem(item);
     setEditType(type);
     setShowEditModal(true);
   };
 
-  const updateItem = (updatedItem, type) => {
+  const updateItem = (updatedItem: any, type: 'habit' | 'task') => {
     if (type === 'habit') {
       setHabits(habits.map(habit => 
         habit.id === updatedItem.id ? updatedItem : habit
