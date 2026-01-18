@@ -12,19 +12,33 @@ export default function LoginPage() {
     password: ''
   });
   const [isLogin, setIsLogin] = useState(true);
+  const [error, setError] = useState('');
+
+  // Utilisateurs prédéfinis
+  const users = [
+    { email: 'admin@habitflow.com', password: 'Admin2026!' },
+    { email: 'demo@habitflow.com', password: 'Demo2026!' },
+    { email: 'test@habitflow.com', password: 'Test2026!' }
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     
-    // Simuler une connexion réussie
     if (isLogin) {
-      // Mode connexion
-      localStorage.setItem('habitflow_user', JSON.stringify({
-        email: formData.email,
-        loggedIn: true,
-        timestamp: Date.now()
-      }));
-      router.push('/');
+      // Mode connexion - vérifier les identifiants
+      const user = users.find(u => u.email === formData.email && u.password === formData.password);
+      
+      if (user) {
+        localStorage.setItem('habitflow_user', JSON.stringify({
+          email: formData.email,
+          loggedIn: true,
+          timestamp: Date.now()
+        }));
+        router.push('/');
+      } else {
+        setError('Email ou mot de passe incorrect');
+      }
     } else {
       // Mode inscription
       localStorage.setItem('habitflow_user', JSON.stringify({
@@ -50,6 +64,23 @@ export default function LoginPage() {
             {isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte'}
           </p>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
+
+        {isLogin && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <p className="text-blue-900 text-sm font-semibold mb-2">Comptes de démonstration :</p>
+            <div className="space-y-1 text-sm text-blue-800">
+              <p>• <strong>admin@habitflow.com</strong> / Admin2026!</p>
+              <p>• <strong>demo@habitflow.com</strong> / Demo2026!</p>
+              <p>• <strong>test@habitflow.com</strong> / Test2026!</p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
