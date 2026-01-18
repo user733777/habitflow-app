@@ -497,80 +497,76 @@ export default function Trackflow() {
 
   // Fonctions pour le timer et les sons
   const playSound = (type: string) => {
-    // Sons mélodieux avec Web Audio API
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-    const createMelodicSound = (frequencies: number[], durations: number[], volumes: number[]) => {
-      frequencies.forEach((freq, index) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + (index * 0.15));
-        
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime + (index * 0.15));
-        gainNode.gain.linearRampToValueAtTime(volumes[index], audioContext.currentTime + (index * 0.15) + 0.02);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + (index * 0.15) + durations[index]);
-        
-        oscillator.start(audioContext.currentTime + (index * 0.15));
-        oscillator.stop(audioContext.currentTime + (index * 0.15) + durations[index]);
-      });
+    const playNote = (freq: number, startTime: number, duration: number, volume: number) => {
+      // Oscillateur principal
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      // Ajouter harmoniques pour un son plus riche
+      const osc2 = audioContext.createOscillator();
+      const gain2 = audioContext.createGain();
+      
+      // Filtre pour adoucir le son
+      const filter = audioContext.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(2000, startTime);
+      
+      osc.connect(gain);
+      osc2.connect(gain2);
+      gain.connect(filter);
+      gain2.connect(filter);
+      filter.connect(audioContext.destination);
+      
+      osc.type = 'triangle'; // Son plus doux que sine
+      osc2.type = 'sine';
+      
+      osc.frequency.setValueAtTime(freq, startTime);
+      osc2.frequency.setValueAtTime(freq * 2, startTime); // Octave supérieure
+      
+      // Enveloppe ADSR
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(volume, startTime + 0.03); // Attack
+      gain.gain.linearRampToValueAtTime(volume * 0.7, startTime + 0.08); // Decay
+      gain.gain.setValueAtTime(volume * 0.7, startTime + duration - 0.1); // Sustain
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration); // Release
+      
+      gain2.gain.setValueAtTime(0, startTime);
+      gain2.gain.linearRampToValueAtTime(volume * 0.3, startTime + 0.03);
+      gain2.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      
+      osc.start(startTime);
+      osc2.start(startTime);
+      osc.stop(startTime + duration);
+      osc2.stop(startTime + duration);
     };
 
+    const now = audioContext.currentTime;
+
     switch(type) {
-      case 'start': // Arpège ascendant doux (C-E-G)
-        createMelodicSound(
-          [261.63, 329.63, 392.00], // Do-Mi-Sol
-          [0.3, 0.3, 0.5],
-          [0.15, 0.15, 0.2]
-        );
+      case 'start': // Carillon démarrage (C5-E5-G5)
+        playNote(523.25, now, 0.4, 0.25); // Do5
+        playNote(659.25, now + 0.15, 0.4, 0.25); // Mi5
+        playNote(783.99, now + 0.3, 0.6, 0.3); // Sol5
         break;
-      case 'tick': // Note unique douce (A)
-        createMelodicSound(
-          [440.00], // La
-          [0.2],
-          [0.12]
-        );
+        
+      case 'tick': // Clic doux (E5)
+        playNote(659.25, now, 0.15, 0.2); // Mi5
         break;
-      case 'end': // Mélodie joyeuse (G-A-B-C)
-        createMelodicSound(
-          [392.00, 440.00, 493.88, 523.25], // Sol-La-Si-Do
-          [0.25, 0.25, 0.25, 0.6],
-          [0.18, 0.18, 0.18, 0.25]
-        );
+        
+      case 'end': // Mélodie de fin (G5-A5-B5-C6)
+        playNote(783.99, now, 0.3, 0.25); // Sol5
+        playNote(880.00, now + 0.2, 0.3, 0.25); // La5
+        playNote(987.77, now + 0.4, 0.3, 0.25); // Si5
+        playNote(1046.50, now + 0.6, 0.7, 0.35); // Do6
         break;
-      case 'complete': // Accord harmonieux (C-E-G ensemble)
-        const oscillator1 = audioContext.createOscillator();
-        const oscillator2 = audioContext.createOscillator();
-        const oscillator3 = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
         
-        oscillator1.connect(gainNode);
-        oscillator2.connect(gainNode);
-        oscillator3.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator1.type = 'sine';
-        oscillator2.type = 'sine';
-        oscillator3.type = 'sine';
-        
-        oscillator1.frequency.setValueAtTime(261.63, audioContext.currentTime); // Do
-        oscillator2.frequency.setValueAtTime(329.63, audioContext.currentTime); // Mi
-        oscillator3.frequency.setValueAtTime(392.00, audioContext.currentTime); // Sol
-        
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-        
-        oscillator1.start(audioContext.currentTime);
-        oscillator2.start(audioContext.currentTime);
-        oscillator3.start(audioContext.currentTime);
-        oscillator1.stop(audioContext.currentTime + 0.8);
-        oscillator2.stop(audioContext.currentTime + 0.8);
-        oscillator3.stop(audioContext.currentTime + 0.8);
+      case 'complete': // Accord de victoire (C5-E5-G5-C6)
+        playNote(523.25, now, 1.0, 0.2); // Do5
+        playNote(659.25, now, 1.0, 0.2); // Mi5
+        playNote(783.99, now, 1.0, 0.2); // Sol5
+        playNote(1046.50, now + 0.1, 1.2, 0.25); // Do6
         break;
     }
   };
