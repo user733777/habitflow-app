@@ -16,9 +16,9 @@ export default function LoginPage() {
 
   // Utilisateurs prédéfinis
   const users = [
-    { email: 'admin@habitflow.com', password: 'Hf@dm1n$2026*Secure!' },
-    { email: 'demo@habitflow.com', password: 'Demo2026!' },
-    { email: 'test@habitflow.com', password: 'Test2026!' }
+    { email: 'admin@trackflow.com', password: 'Hf@dm1n$2026*Secure!' },
+    { email: 'demo@trackflow.com', password: 'Demo2026!' },
+    { email: 'test@trackflow.com', password: 'Test2026!' }
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -30,7 +30,7 @@ export default function LoginPage() {
       const user = users.find(u => u.email === formData.email && u.password === formData.password);
       
       if (user) {
-        localStorage.setItem('habitflow_user', JSON.stringify({
+        localStorage.setItem('trackflow_user', JSON.stringify({
           email: formData.email,
           loggedIn: true,
           timestamp: Date.now()
@@ -58,7 +58,7 @@ export default function LoginPage() {
             <Target className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            HabitFlow
+            Trackflow
           </h1>
           <p className="text-gray-600 mt-2">
             {isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte'}

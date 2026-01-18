@@ -15,9 +15,9 @@ function LoginComponent({ onLogin }: { onLogin: () => void }) {
   const [error, setError] = useState('');
 
   const users = [
-    { email: 'admin@habitflow.com', password: 'Hf@dm1n$2026*Secure!' },
-    { email: 'demo@habitflow.com', password: 'Demo2026!' },
-    { email: 'test@habitflow.com', password: 'Test2026!' }
+    { email: 'admin@trackflow.com', password: 'Hf@dm1n$2026*Secure!' },
+    { email: 'demo@trackflow.com', password: 'Demo2026!' },
+    { email: 'test@trackflow.com', password: 'Test2026!' }
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -28,7 +28,7 @@ function LoginComponent({ onLogin }: { onLogin: () => void }) {
       const user = users.find(u => u.email === formData.email && u.password === formData.password);
       
       if (user) {
-        localStorage.setItem('habitflow_user', JSON.stringify({
+        localStorage.setItem('trackflow_user', JSON.stringify({
           email: formData.email,
           loggedIn: true,
           timestamp: Date.now()
@@ -38,7 +38,7 @@ function LoginComponent({ onLogin }: { onLogin: () => void }) {
         setError('Email ou mot de passe incorrect');
       }
     } else {
-      localStorage.setItem('habitflow_user', JSON.stringify({
+      localStorage.setItem('trackflow_user', JSON.stringify({
         email: formData.email,
         loggedIn: true,
         timestamp: Date.now()
@@ -55,7 +55,7 @@ function LoginComponent({ onLogin }: { onLogin: () => void }) {
             <Target className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            HabitFlow
+            Trackflow
           </h1>
           <p className="text-gray-600 mt-2">
             {isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte'}
@@ -185,14 +185,14 @@ function LoginComponent({ onLogin }: { onLogin: () => void }) {
   );
 }
 
-export default function HabitFlow() {
+export default function Trackflow() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
   // Vérifier l'authentification au chargement
   useEffect(() => {
-    const user = localStorage.getItem('habitflow_user');
+    const user = localStorage.getItem('trackflow_user');
     if (user) {
       const userData = JSON.parse(user);
       if (userData.loggedIn) {
@@ -900,10 +900,10 @@ export default function HabitFlow() {
   // Système de stockage robuste
   const STORAGE_VERSION = '1.0';
   const STORAGE_KEYS = {
-    habits: 'habitflow_habits_v1',
-    tasks: 'habitflow_tasks_v1',
-    backup: 'habitflow_backup',
-    version: 'habitflow_version'
+    habits: 'trackflow_habits_v1',
+    tasks: 'trackflow_tasks_v1',
+    backup: 'trackflow_backup',
+    version: 'trackflow_version'
   };
 
   // Fonction de sauvegarde robuste
@@ -940,7 +940,7 @@ export default function HabitFlow() {
           
           // Nettoyer les anciennes versions
           Object.keys(localStorage).forEach(storageKey => {
-            if (storageKey.includes('habitflow') && !storageKey.includes('_v1')) {
+            if (storageKey.includes('trackflow') && !storageKey.includes('_v1')) {
               localStorage.removeItem(storageKey);
             }
           });
@@ -1012,7 +1012,7 @@ export default function HabitFlow() {
     }
     
     // Nettoyer les anciennes versions si elles existent
-    const oldKeys = ['habitflow_habits', 'habitflow_tasks'];
+    const oldKeys = ['trackflow_habits', 'trackflow_tasks'];
     oldKeys.forEach(oldKey => {
       if (localStorage.getItem(oldKey)) {
         console.log(`🧹 Removing old storage key: ${oldKey}`);
@@ -1066,7 +1066,7 @@ export default function HabitFlow() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `habitflow-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `trackflow-backup-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -2640,7 +2640,7 @@ export default function HabitFlow() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('habitflow_user');
+    localStorage.removeItem('trackflow_user');
     router.push('/login');
   };
 
@@ -2671,7 +2671,7 @@ export default function HabitFlow() {
                 <Target className="w-5 h-5 text-white" />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                HabitFlow
+                Trackflow
               </h1>
             </div>
             
