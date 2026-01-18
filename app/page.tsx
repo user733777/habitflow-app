@@ -498,75 +498,58 @@ export default function Trackflow() {
   // Fonctions pour le timer et les sons
   const playSound = (type: string) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-
-    const playNote = (freq: number, startTime: number, duration: number, volume: number) => {
-      // Oscillateur principal
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
+    
+    // Créer un son de cloche/carillon naturel
+    const createBell = (freq: number, startTime: number, duration: number) => {
+      // Multiple partials pour un son de cloche réaliste
+      const partials = [
+        { mult: 1, vol: 1.0 },
+        { mult: 2.76, vol: 0.4 },
+        { mult: 5.4, vol: 0.15 },
+        { mult: 8.93, vol: 0.08 }
+      ];
       
-      // Ajouter harmoniques pour un son plus riche
-      const osc2 = audioContext.createOscillator();
-      const gain2 = audioContext.createGain();
-      
-      // Filtre pour adoucir le son
-      const filter = audioContext.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(2000, startTime);
-      
-      osc.connect(gain);
-      osc2.connect(gain2);
-      gain.connect(filter);
-      gain2.connect(filter);
-      filter.connect(audioContext.destination);
-      
-      osc.type = 'triangle'; // Son plus doux que sine
-      osc2.type = 'sine';
-      
-      osc.frequency.setValueAtTime(freq, startTime);
-      osc2.frequency.setValueAtTime(freq * 2, startTime); // Octave supérieure
-      
-      // Enveloppe ADSR
-      gain.gain.setValueAtTime(0, startTime);
-      gain.gain.linearRampToValueAtTime(volume, startTime + 0.03); // Attack
-      gain.gain.linearRampToValueAtTime(volume * 0.7, startTime + 0.08); // Decay
-      gain.gain.setValueAtTime(volume * 0.7, startTime + duration - 0.1); // Sustain
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration); // Release
-      
-      gain2.gain.setValueAtTime(0, startTime);
-      gain2.gain.linearRampToValueAtTime(volume * 0.3, startTime + 0.03);
-      gain2.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-      
-      osc.start(startTime);
-      osc2.start(startTime);
-      osc.stop(startTime + duration);
-      osc2.stop(startTime + duration);
+      partials.forEach(partial => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        
+        osc.type = 'sine';
+        osc.frequency.value = freq * partial.mult;
+        
+        // Enveloppe exponentielle naturelle
+        gain.gain.setValueAtTime(0.3 * partial.vol, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+        
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+      });
     };
 
     const now = audioContext.currentTime;
 
     switch(type) {
-      case 'start': // Carillon démarrage (C5-E5-G5)
-        playNote(523.25, now, 0.4, 0.25); // Do5
-        playNote(659.25, now + 0.15, 0.4, 0.25); // Mi5
-        playNote(783.99, now + 0.3, 0.6, 0.3); // Sol5
+      case 'start':
+        createBell(523.25, now, 0.8); // Do5
+        createBell(659.25, now + 0.1, 0.8); // Mi5
         break;
         
-      case 'tick': // Clic doux (E5)
-        playNote(659.25, now, 0.15, 0.2); // Mi5
+      case 'tick':
+        createBell(880, now, 0.3); // La5
         break;
         
-      case 'end': // Mélodie de fin (G5-A5-B5-C6)
-        playNote(783.99, now, 0.3, 0.25); // Sol5
-        playNote(880.00, now + 0.2, 0.3, 0.25); // La5
-        playNote(987.77, now + 0.4, 0.3, 0.25); // Si5
-        playNote(1046.50, now + 0.6, 0.7, 0.35); // Do6
+      case 'end':
+        createBell(659.25, now, 0.5); // Mi5
+        createBell(783.99, now + 0.15, 0.5); // Sol5
+        createBell(1046.50, now + 0.3, 1.0); // Do6
         break;
         
-      case 'complete': // Accord de victoire (C5-E5-G5-C6)
-        playNote(523.25, now, 1.0, 0.2); // Do5
-        playNote(659.25, now, 1.0, 0.2); // Mi5
-        playNote(783.99, now, 1.0, 0.2); // Sol5
-        playNote(1046.50, now + 0.1, 1.2, 0.25); // Do6
+      case 'complete':
+        createBell(523.25, now, 1.5); // Do5
+        createBell(659.25, now + 0.05, 1.5); // Mi5
+        createBell(783.99, now + 0.1, 1.5); // Sol5
         break;
     }
   };
