@@ -497,63 +497,80 @@ export default function Trackflow() {
 
   // Fonctions pour le timer et les sons
   const playSound = (type: string) => {
-    // Création des sons marins avec Web Audio API
+    // Sons mélodieux avec Web Audio API
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-    const createMarineSound = (frequency: number, duration: number, type: string) => {
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      switch(type) {
-        case 'start': // Son de corne de brume - démarrage
-          oscillator.frequency.setValueAtTime(120, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + duration);
-          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-          break;
-        case 'tick': // Son de cloche marine - validation
-          oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
-          gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-          break;
-        case 'end': // Son de sirène - fin de timer
-          oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-          oscillator.frequency.linearRampToValueAtTime(600, audioContext.currentTime + 0.2);
-          oscillator.frequency.linearRampToValueAtTime(400, audioContext.currentTime + 0.4);
-          oscillator.frequency.linearRampToValueAtTime(600, audioContext.currentTime + 0.6);
-          gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-          duration = 0.8;
-          break;
-        case 'complete': // Son de corne grave - validation finale
-          oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-          oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + duration);
-          gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-          break;
-      }
-      
-      oscillator.type = 'sine';
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + duration);
+    const createMelodicSound = (frequencies: number[], durations: number[], volumes: number[]) => {
+      frequencies.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + (index * 0.15));
+        
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime + (index * 0.15));
+        gainNode.gain.linearRampToValueAtTime(volumes[index], audioContext.currentTime + (index * 0.15) + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + (index * 0.15) + durations[index]);
+        
+        oscillator.start(audioContext.currentTime + (index * 0.15));
+        oscillator.stop(audioContext.currentTime + (index * 0.15) + durations[index]);
+      });
     };
 
     switch(type) {
-      case 'start':
-        createMarineSound(120, 1.2, 'start');
+      case 'start': // Arpège ascendant doux (C-E-G)
+        createMelodicSound(
+          [261.63, 329.63, 392.00], // Do-Mi-Sol
+          [0.3, 0.3, 0.5],
+          [0.15, 0.15, 0.2]
+        );
         break;
-      case 'tick':
-        createMarineSound(800, 0.3, 'tick');
+      case 'tick': // Note unique douce (A)
+        createMelodicSound(
+          [440.00], // La
+          [0.2],
+          [0.12]
+        );
         break;
-      case 'end':
-        createMarineSound(400, 0.8, 'end');
+      case 'end': // Mélodie joyeuse (G-A-B-C)
+        createMelodicSound(
+          [392.00, 440.00, 493.88, 523.25], // Sol-La-Si-Do
+          [0.25, 0.25, 0.25, 0.6],
+          [0.18, 0.18, 0.18, 0.25]
+        );
         break;
-      case 'complete':
-        createMarineSound(200, 1.0, 'complete');
+      case 'complete': // Accord harmonieux (C-E-G ensemble)
+        const oscillator1 = audioContext.createOscillator();
+        const oscillator2 = audioContext.createOscillator();
+        const oscillator3 = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator1.connect(gainNode);
+        oscillator2.connect(gainNode);
+        oscillator3.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator1.type = 'sine';
+        oscillator2.type = 'sine';
+        oscillator3.type = 'sine';
+        
+        oscillator1.frequency.setValueAtTime(261.63, audioContext.currentTime); // Do
+        oscillator2.frequency.setValueAtTime(329.63, audioContext.currentTime); // Mi
+        oscillator3.frequency.setValueAtTime(392.00, audioContext.currentTime); // Sol
+        
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+        
+        oscillator1.start(audioContext.currentTime);
+        oscillator2.start(audioContext.currentTime);
+        oscillator3.start(audioContext.currentTime);
+        oscillator1.stop(audioContext.currentTime + 0.8);
+        oscillator2.stop(audioContext.currentTime + 0.8);
+        oscillator3.stop(audioContext.currentTime + 0.8);
         break;
     }
   };
