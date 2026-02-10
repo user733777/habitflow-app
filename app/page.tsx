@@ -2055,64 +2055,68 @@ export default function Trackflow() {
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <h2 className="text-xl font-bold text-gray-900 mb-6">Toutes les tâches</h2>
         
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTasks.map(task => (
-            <div key={task.id} className="flex items-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors group">
-              <button
-                onClick={() => toggleTask(task.id)}
-                className={`mr-4 transition-colors ${
-                  task.completed 
-                    ? 'text-green-500' 
-                    : 'text-gray-400 hover:text-green-500'
-                }`}
-              >
-                {task.completed ? <CheckCircle className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-              </button>
-              
-              <div className={`w-4 h-4 rounded-full ${(task as any).color || 'bg-gray-500'} mr-4`}></div>
-              
-              <div className="flex-1">
-                <h3 className={`font-semibold ${task.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
-                  {task.title}
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">{(task as any).description}</p>
-                <div className="flex items-center mt-2 space-x-4">
-                  <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
-                    {task.priority}
-                  </span>
-                  <span className="text-xs bg-gray-200 px-2 py-1 rounded-full">{task.category}</span>
-                  {task.dueDate && (
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Clock className="w-3 h-3 mr-1" />
-                      {task.dueDate}
-                    </div>
-                  )}
-                  <div className="flex items-center text-xs text-gray-500">
-                    <span>{task.duration || 30}min</span>
-                  </div>
-                  {task.timerEnabled && (
-                    <button
-                      onClick={() => startTimer(task)}
-                      disabled={isTimerRunning}
-                      className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                        isTimerRunning 
-                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                          : 'bg-green-100 text-green-600 hover:bg-green-200'
-                      }`}
-                    >
-                      {isTimerRunning ? '⏳' : '▶️'} Timer
-                    </button>
-                  )}
+            <div key={task.id} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 hover:shadow-md transition-shadow group">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-12 h-12 rounded-full ${getPriorityColor(task.priority).replace('px-2 py-1', '')} flex items-center justify-center`}>
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => toggleTask(task.id)}
+                    className={`p-2 rounded-full transition-colors ${
+                      task.completed 
+                        ? 'bg-green-500 text-white' 
+                        : 'bg-white border-2 border-gray-300 text-transparent hover:border-green-500'
+                    }`}
+                  >
+                    <CheckCircle className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => openEditModal(task, 'task')}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-gray-400 hover:text-gray-600"
+                  >
+                    <MoreHorizontal className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <button 
-                  onClick={() => openEditModal(task, 'task')}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-2 text-gray-400 hover:text-gray-600"
-                >
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
+              <h3 className="font-bold text-gray-900 mb-2">{task.title}</h3>
+              <p className="text-sm text-gray-600 mb-4">{(task as any).description || 'Aucune description'}</p>
+              
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
+                    {task.priority === 'high' ? 'Haute' : task.priority === 'medium' ? 'Moyenne' : 'Basse'}
+                  </span>
+                  <span className="text-xs bg-gray-200 px-2 py-1 rounded-full">{task.category}</span>
+                </div>
+                {task.timerEnabled && (
+                  <button
+                    onClick={() => startTimer(task)}
+                    disabled={isTimerRunning}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      isTimerRunning 
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                        : 'bg-green-100 text-green-600 hover:bg-green-200'
+                    }`}
+                  >
+                    {isTimerRunning ? '⏳' : '▶️'} Timer
+                  </button>
+                )}
+              </div>
+              
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
+                {task.dueDate && (
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Clock className="w-3 h-3 mr-1" />
+                    {task.dueDate}
+                  </div>
+                )}
+                <div className="flex items-center text-xs text-gray-500">
+                  <span>{task.duration || 30}min</span>
+                </div>
               </div>
             </div>
           ))}
@@ -2658,7 +2662,8 @@ export default function Trackflow() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen w-full bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 pb-[env(safe-area-inset-bottom)] landscape:overflow-y-scroll landscape:h-screen"
+>
       <header className="bg-white shadow-sm border-b border-gray-100 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="flex items-center justify-between h-16">
@@ -3357,7 +3362,7 @@ export default function Trackflow() {
                             <Target className="w-5 h-5 text-white" />
                           </div>
                           <div>
-                            <h4 className="font-bold text-gray-900">HabitFlow</h4>
+                            <h4 className="font-bold text-gray-900">Trackflow</h4>
                             <p className="text-sm text-gray-600">Version 1.0.0</p>
                           </div>
                         </div>
