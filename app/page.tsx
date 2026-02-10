@@ -187,20 +187,20 @@ function LoginComponent({ onLogin }: { onLogin: () => void }) {
 
 export default function Trackflow() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Authentification automatique pour version mobile
+  const [isLoading, setIsLoading] = useState(false); // Pas de chargement nécessaire
   
-  // Vérifier l'authentification au chargement
+  // Authentification automatique - toujours connecté pour la version mobile
   useEffect(() => {
+    // Auto-login pour la version mobile
     const user = localStorage.getItem('trackflow_user');
-    if (user) {
-      const userData = JSON.parse(user);
-      if (userData.loggedIn) {
-        setIsAuthenticated(true);
-      }
+    if (!user) {
+      // Créer un utilisateur par défaut si inexistant
+      const defaultUser = { loggedIn: true, autoLogin: true };
+      localStorage.setItem('trackflow_user', JSON.stringify(defaultUser));
     }
-    setIsLoading(false);
-  }, [router]);
+    setIsAuthenticated(true);
+  }, []);
   
   const [activeTab, setActiveTab] = useState('dashboard');
   const [habits, setHabits] = useState([
