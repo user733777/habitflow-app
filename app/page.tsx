@@ -204,6 +204,15 @@ export default function Trackflow() {
       localStorage.setItem('trackflow_user', JSON.stringify(defaultUser));
     }
     setIsAuthenticated(true);
+    
+    // Demander les permissions pour notifications natives sur mobile
+    if (Capacitor.isNativePlatform()) {
+      LocalNotifications.requestPermissions().then(result => {
+        console.log('Notification permissions:', result);
+      });
+    } else if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }, []);
   
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -657,11 +666,16 @@ export default function Trackflow() {
   };
 
   const startTimer = (item: any) => {
+    console.log('🎬 START TIMER called for:', item.name || item.title);
+    
     if (isTimerRunning) {
+      console.log('⚠️ Timer already running, stopping it first');
       stopTimer();
     }
 
     const duration = (item.duration || 30) * 60; // Conversion en secondes
+    console.log('⏱️ Duration:', duration, 'seconds');
+    
     setActiveTimer(item);
     setTimeRemaining(duration);
     setIsTimerRunning(true);
@@ -670,58 +684,55 @@ export default function Trackflow() {
     playSound('start');
     
     // Notification de démarrage
+    console.log('📢 Showing start notification');
     showNotification(
       `🏁 Timer démarré`,
       `${item.name || item.title} - ${item.duration || 30} minutes`,
       { tag: 'timer-start' }
     );
+    
+    // Toast natif pour confirmer le démarrage
+    if (Capacitor.isNativePlatform()) {
+      Toast.show({
+        text: `Timer démarré: ${item.duration || 30} min`,
+        duration: 'short',
+        position: 'bottom'
+      });
+    }
 
     // Intervalle du timer
+    console.log('🔄 Starting interval');
     const interval = setInterval(() => {
+      console.log('⏲️ Timer tick');
       setTimeRemaining(prev => {
+        console.log('Current time:', prev);
         if (prev <= 1) {
           // Timer terminé
+          console.log('🏁 TIMER FINISHED!');
           clearInterval(interval);
           setIsTimerRunning(false);
           
-          // Série de notifications et sons d'alerte
-          const triggerAlertSeries = () => {
-            let alertCount = 0;
-            const maxAlerts = 5; // 5 notifications répétées
-            
-            const alertInterval = setInterval(() => {
-              alertCount++;
-              
-              // Son d'alerte de plus en plus insistant
-              playSound('end');
-              
-              // Notification avec urgence croissante
-              showNotification(
-                `🚨 TIMER TERMINÉ ! (${alertCount}/${maxAlerts})`,
-                `${item.name || item.title} est terminé ! Cliquez pour marquer comme fait.`,
-                { 
-                  tag: `timer-alert-${alertCount}`,
-                  requireInteraction: true,
-                  silent: false,
-                  vibrate: [200, 100, 200, 100, 200], // Vibration si supportée
-                  actions: [
-                    { action: 'complete', title: '✅ Marquer comme terminé' },
-                    { action: 'restart', title: '🔄 Recommencer' },
-                    { action: 'snooze', title: '😴 Reporter 5min' }
-                  ]
-                }
-              );
-              
-              // Arrêter après 5 alertes ou si plus de timer actif
-              if (alertCount >= maxAlerts || !item) {
-                clearInterval(alertInterval);
-                setActiveTimer(null);
-              }
-            }, 10000); // Une alerte toutes les 10 secondes
-          };
+          // Son d'alerte
+          playSound('end');
           
-          // Démarrer la série d'alertes
-          triggerAlertSeries();
+          // Notification de fin
+          showNotification(
+            `🚨 TIMER TERMINÉ !`,
+            `${item.name || item.title} est terminé !`,
+            { 
+              tag: `timer-end`,
+              requireInteraction: true
+            }
+          );
+          
+          // Toast natif
+          if (Capacitor.isNativePlatform()) {
+            Toast.show({
+              text: `⏰ Timer terminé !`,
+              duration: 'long',
+              position: 'center'
+            });
+          }
           
           return 0;
         }
