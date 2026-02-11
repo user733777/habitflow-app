@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Calendar, Target, CheckCircle, Circle, Flame, Trophy, BarChart3, Settings, Home, Search, MoreHorizontal, Clock, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Toast } from '@capacitor/toast';
 
 // Composant de connexion
 function LoginComponent({ onLogin }: { onLogin: () => void }) {
@@ -496,7 +500,23 @@ export default function Trackflow() {
   };
 
   // Fonctions pour le timer et les sons
-  const playSound = (type: string) => {
+  const playSound = async (type: string) => {
+    // Vibration native sur mobile
+    if (Capacitor.isNativePlatform()) {
+      try {
+        if (type === 'start') {
+          await Haptics.impact({ style: ImpactStyle.Medium });
+        } else if (type === 'end' || type === 'complete') {
+          await Haptics.impact({ style: ImpactStyle.Heavy });
+        } else {
+          await Haptics.impact({ style: ImpactStyle.Light });
+        }
+      } catch (error) {
+        console.error('Haptics error:', error);
+      }
+    }
+    
+    // Son audio
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     
     // Créer un son de cloche/carillon naturel
@@ -554,8 +574,39 @@ export default function Trackflow() {
     }
   };
 
-  const showNotification = (title: string, body: string, options: any = {}) => {
+  const showNotification = async (title: string, body: string, options: any = {}) => {
     console.log('🔔 Attempting to show notification:', title, body);
+    
+    // Utiliser les notifications natives sur mobile
+    if (Capacitor.isNativePlatform()) {
+      try {
+        // Demander la permission
+        const permission = await LocalNotifications.requestPermissions();
+        
+        if (permission.display === 'granted') {
+          await LocalNotifications.schedule({
+            notifications: [
+              {
+                title: title,
+                body: body,
+                id: Math.floor(Math.random() * 100000),
+                schedule: { at: new Date(Date.now() + 100) },
+                sound: 'beep.wav',
+                attachments: undefined,
+                actionTypeId: '',
+                extra: null
+              }
+            ]
+          });
+          console.log('✅ Native notification sent');
+        }
+      } catch (error) {
+        console.error('❌ Native notification error:', error);
+      }
+      return;
+    }
+    
+    // Version web pour navigateur
     console.log('🔍 Notification permission:', Notification.permission);
     
     if (!('Notification' in window)) {
